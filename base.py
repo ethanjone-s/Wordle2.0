@@ -209,7 +209,7 @@ winStatements=[
 keyboardLayout=[
     list('qwertyuiop'),
     list('asdfghjkl'),
-    ['Enter']+list('zxcvbnm')+['Delete']
+    ['Enter']+list('zxcvbnm')+['BackSpace']
 ]
 
 class wordle:
@@ -287,7 +287,7 @@ class wordle:
             rowFrame=tk.Frame(kbFrame,bg='#ffffff').pack(pady=2)
 
             for key in rowKeys:
-                wide=key in ('Enter','Delete')
+                wide=key in ('Enter','BackSpace')
                 bttn=tk.Button(
                     rowFrame,
                     text=key if wide else key.upper(),
@@ -342,7 +342,7 @@ class wordle:
         key=event.keysym
         if key=='Return':
             self.submitGuess()
-        elif key=='Delete':
+        elif key=='BackSpace':
             self.deleteLetter()
         elif key.isalpha() and len(key)==1:
             self.addLetter(key.lower())
@@ -352,7 +352,7 @@ class wordle:
             return
         if key=='Enter':
             self.submitGuess()
-        elif key=='Delete':
+        elif key=='BackSpace':
             self.deleteLetter()
         else:
             self.addLetter(key)
