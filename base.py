@@ -242,28 +242,28 @@ class wordle:
 
         # build the header
         tk.Frame(self.root,bg='#a9b3c2',height=1).pack(fill='x')
-        header=tk.Frame(self.root,bg='#ffffff',pady=10)
+        header=tk.Frame(self.root,bg='#1c1c1c',pady=10)
         header.pack(fill='x')
         tk.Label(header,text='Wordle 2.0',font=('Cascadia Mono',28,'bold'),
-                 bg='#ffffff',fg='#161617').pack()
+                 bg='#1c1c1c',fg='#161617').pack()
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
         # build the tile grid
-        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=20)
+        gridFrame = tk.Frame(self.root, bg='#1c1c1c', pady=20)
         gridFrame.pack()
         
         for r in range(6):
             rowTiles,rowLabels=[],[]
             for c in range(5):
                 frame=tk.Frame(
-                    gridFrame,width=62,height=62,bg='#ffffff',
+                    gridFrame,width=62,height=62,bg='#1c1c1c',
                     highlightbackground='#d3d6da',highlightthickness=2
                 )
                 frame.grid(row=r,column=c,padx=3,pady=3)
                 frame.pack_propagate(False)
 
                 label=tk.Label(frame,text='',font=('Cascadia Mono',24,'bold'),
-                               bg='#ffffff',fg='#161617')
+                               bg='#1c1c1c',fg='#161617')
                 label.pack(expand=True,fill='both')
                 rowTiles.append(frame)
                 rowLabels.append(label)
@@ -273,7 +273,7 @@ class wordle:
         # build the message bar
         self.msgLabel = tk.Label(
             self.root, text='', font=('Cascadia Mono', 12, 'bold'),
-            bg='#ffffff', fg='#161617')
+            bg='#1c1c1c', fg='#161617')
         self.msgLabel.pack(pady=4)      
 
         # build keyboard and stats
@@ -291,11 +291,11 @@ class wordle:
         ).pack(pady=12)
 
     def buildKeyboard(self):
-        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8)
+        kbFrame=tk.Frame(self.root,bg='#1c1c1c',pady=8)
         kbFrame.pack()
 
         for rowKeys in keyboardLayout:
-            rowFrame=tk.Frame(kbFrame,bg='#ffffff')
+            rowFrame=tk.Frame(kbFrame,bg='#1c1c1c')
             rowFrame.pack(pady=2)
 
             for key in rowKeys:
@@ -315,7 +315,7 @@ class wordle:
                     self.keyButtons[key]=bttn
 
     def buildStats(self):
-        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=14)
+        statsFrame=tk.Frame(self.root,bg='#1c1c1c',pady=14)
         statsFrame.pack()
 
         self.statValLabels={}
@@ -327,13 +327,13 @@ class wordle:
         ]
 
         for i,(key,label) in enumerate(items):
-            col=tk.Frame(statsFrame,bg='#ffffff',padx=14)
+            col=tk.Frame(statsFrame,bg='#1c1c1c',padx=14)
             col.grid(row=0,column=i)
             val=tk.Label(col,text='0',font=('Cascadia Mono',22,'bold'),
-                         bg='#ffffff')
+                         bg='#1c1c1c')
             val.pack()
             tk.Label(col,text=label,font=('Cascadia Mono',9),
-                     bg='#ffffff',fg='#808080').pack()
+                     bg='#1c1c1c',fg='#808080').pack()
             self.statValLabels[key]=val
 
         self.refreshStats()
@@ -460,12 +460,12 @@ class wordle:
         for r in range(6):
             for c in range(5):
                 self.tiles[r][c].config(
-                    bg='#ffffff', highlightbackground='#d3d6da', highlightthickness=2)
+                    bg='#1c1c1c', highlightbackground='#d3d6da', highlightthickness=2)
                 self.tileLabels[r][c].config(
-                    text='', bg='#ffffff', fg='#161617')
+                    text='', bg='#1c1c1c', fg='#161617')
 
         for btn in self.keyButtons.values():
-            btn.config(bg='#d3d6da', fg='#161617')
+            btn.config(bg='#d3d6da', fg="#FFFFFF")
 
         self.msgLabel.config(text='')
 
