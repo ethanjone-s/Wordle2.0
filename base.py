@@ -59,12 +59,12 @@ def checker(guess,target):
     # Pass One
     for i in range(5):
         if guess[i]==characters[i]:
-            result[i]='green'
+            result[i]='blue'
             characters[i]=None
 
     # Pass Two
     for i in range(5):
-        if result[i]=='green':
+        if result[i]=='blue':
             continue
         if guess[i] in characters:
             result[i]='yellow'
@@ -126,6 +126,7 @@ def wordle():
 
 from colorama import Fore,Back,Style,init
 import tkinter as tk
+from tkinter import colorchooser
 
 init(autoreset=True)
 
@@ -194,10 +195,11 @@ def wordleTerminal(words):
 #------------------------GUI-Player---------------------------#
 
 letterColors={
-    'green':{'bg':"#008000",'fg':"white"},
-    'yellow':{'bg':"#c9c869",'fg':"white"},
-    'grey':{'bg':"#808080",'fg':"white"},
-    'empty':{'bg':"#ffffff",'fg':"black"}
+    'blue':{'bg':'#395296','fg':'#ffffff'},
+    'green':{'bg':'#008000','fg':'#ffffff'},
+    'yellow':{'bg':'#c9c869','fg':'#ffffff'},
+    'grey':{'bg':'#808080','fg':'#ffffff'},
+    'empty':{'bg':'#ffffff','fg':'#000000'}
 }
 winStatements=[
     'Cheater.','Not bad I guess.','Great.','Satisfactory.','Close one.','Balright.'
@@ -220,6 +222,7 @@ class wordle:
         self.target=random.choice(list(words))
         self.stats=loadstats()
         self.scale=scale
+        self.darkMode=False
 
         self.currentRow=0
         self.currentGuess=[]
@@ -246,10 +249,18 @@ class wordle:
         header.pack(fill='x')
         tk.Label(header,text='Wordlite',font=('Cascadia Mono',self.s(28),'bold'),
                  bg='#ffffff',fg='#161617').pack()
+        self.menu=tk.Button(
+            header,text='≡',
+            font=('Cascadia Mono',self.s(14)),
+            bg='#ffffff',fg='#161617',
+            relief='flat',bd=0,
+            command=self.showMenu
+        )
+        self.menu.place(relx=1.0,rely=0.5,anchor='e',x=-self.s(10))
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
         # build the tile grid
-        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20),padx=self.s(75))
+        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20),padx=self.s(80))
         gridFrame.pack()
         
         for r in range(6):
@@ -283,7 +294,7 @@ class wordle:
         self.playAgainBttn=tk.Button(
             self.root,text='Play Again',
             font=('Cascadia Mono',self.s(11),'bold'),
-            bg='#385669',fg='#ffffff',
+            bg='#31633d',fg='#ffffff',
             relief='flat',bd=0,
             padx=self.s(20),pady=self.s(8),
             command=self.resetGame
@@ -304,9 +315,9 @@ class wordle:
                 bttn=tk.Button(
                     rowFrame,
                     text=key if wide else key.upper(),
-                    font=('Cascadia Mono',self.s(10),'bold'),
+                    font=('Cascadia Mono',self.s(11),'bold'),
                     bg='#d3d6da',fg='#161617',
-                    width=6 if wide else 3,
+                    width=8 if wide else 4,
                     height=2,
                     relief='flat',bd=0,
                     command=lambda k=key: self.onKeyButton(k)
@@ -346,6 +357,69 @@ class wordle:
         self.statValLabels['winPercent'].config(text=str(winPercent))
         self.statValLabels['Current Streak'].config(text=str(self.stats['Current Streak']))
         self.statValLabels['Max Streak'].config(text=str(self.stats['Max Streak']))
+
+    def showMenu(self):
+        menu=tk.Menu(self.root,tearoff=0)
+        menu.add_command(label='Stats',command=self.showStatsWindow)
+        menu.add_command(label='Dark Mode',command=self.toggleDarkMode)
+        menu.add_command(label='Tile Colors',command=self.showColorPicker)
+        
+        x=self.menu.winfo_rootx()
+        y=self.menu.winfo_rooty()+self.menu.winfo_height()
+        menu.tk_popup(x,y)
+
+    def showStatsWindow(self):
+        win=tk.Toplevel(self.root)
+        win.title('Stats')
+        win.configure(bg='#ffffff')
+        win.resizable(False,False)
+
+        winPercent=int(self.stats['Wins']/self.stats['Played']*100 if self.stats['Played'] > 0 else 0)
+
+        # building the highest stats
+        statsRow=tk.Frame(win,bg='#ffffff',pady=self.s(10))
+        statsRow.pack()
+        for i, (label,value) in enumerate([
+            ('Played',self.stats['Played']),
+            ('Win %',winPercent),
+            ('Streak',self.stats['Current Streak']),
+            ('Best',self.stats['Max Streak'])
+        ]):
+            col = tk.Frame(statsRow,bg='#ffffff',padx=self.s(12))
+            col.grid(row=0,column=i)
+            tk.Label(col,text=str(value),font=('Cascadia Mono',self.s(20),'bold'),
+                    bg='#ffffff').pack()
+            tk.Label(col, text=label,font=('Cascadia Mono',self.s(9)),
+                    bg='#ffffff',fg='#808080').pack()
+            
+        tk.Frame(win,bg='#d3d6da',height=1).pack(fill='x',pady=self.s(4))
+
+        # user guess distribution
+        tk.Label(win,text='Guess Distribution',
+                font=('Cascadia Mono',self.s(11),'bold'),
+                bg='#ffffff').pack(pady=(self.s(6),self.s(4)))
+        
+        distFrame=tk.Frame(win,bg='#ffffff')
+        distFrame.pack(padx=self.s(20),pady=self.s(8))
+        maxCount=max(self.stats['Guess Distribution'].values()) or 1
+
+        for k in range(1,7):
+            count=self.stats['Guess Distribution'][str(k)]
+            bWidth=max(self.s(20),int((count/maxCount)*self.s(150)))
+            row=tk.Frame(distFrame,bg='#ffffff')
+            row.pack(fill='x',pady=self.s(2))
+            tk.Label(row,text=str(k),font=('Cascadia Mono',self.s(10)),
+                bg='#ffffff',width=2).pack(side='left')
+            tk.Frame(row,text=str(count),font=('Cascadia Mono',self.s(10)),
+                     bg='#ffffff').pack(side='left')
+
+    #def toggleDarkMode(self):
+
+        #def recolor():
+
+    #def showColorPicker(self):
+
+    #def changeColor(self,colorKey,preview):
 
     #--------------------Input-Handling-----------------------#
 
@@ -434,9 +508,9 @@ class wordle:
         
     def updateKeyboard(self,result):
         '''
-        Priority set for green to change first, then yellow, then grey.
+        Priority set for blue to change first, then yellow, then grey.
         '''
-        priority={'green':3,'yellow':2,'grey':1}
+        priority={'blue':3,'yellow':2,'grey':1}
         for letter, color in result:
             if letter in self.keyButtons:
                 current=self.keyColors.get(letter,'none')
