@@ -249,7 +249,9 @@ class wordle:
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
         # build the tile grid
-        gridFrame=tk.Frame(self.root,bg='#ffffff',pady=20).pack()
+        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=20)
+        gridFrame.pack()
+        
         for r in range(6):
             rowTiles,rowLabels=[],[]
             for c in range(5):
@@ -269,15 +271,17 @@ class wordle:
             self.tileLabels.append(rowLabels)
 
         # build the message bar
-        self.msgLabel=tk.Label(
-            self.root,text='',font=('Cascadia Mono',12,'bold'),
-            bg='#ffffff',fg='#161617').pack(pady=4)      
+        self.msgLabel = tk.Label(
+            self.root, text='', font=('Cascadia Mono', 12, 'bold'),
+            bg='#ffffff', fg='#161617')
+        self.msgLabel.pack(pady=4)      
 
         # build keyboard
         self.buildStats()
 
     def buildKeyboard(self):
-        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8).pack()
+        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8)
+        kbFrame.pack()
 
         for rowKeys in keyboardLayout:
             rowFrame=tk.Frame(kbFrame,bg='#ffffff').pack(pady=2)
@@ -299,7 +303,8 @@ class wordle:
                     self.keyButtons[key]=bttn
 
     def buildStats(self):
-        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=14).pack()
+        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=14)
+        statsFrame.pack()
 
         self.statValLabels={}
         items=[
@@ -313,7 +318,8 @@ class wordle:
             col=tk.Frame(statsFrame,bg='#ffffff',padx=14)
             col.grid(row=0,column=i)
             val=tk.Label(col,text='0',font=('Cascadia Mono',22,'bold'),
-                         bg='#ffffff').pack()
+                         bg='#ffffff')
+            val.pack()
             tk.Label(col,text=label,font=('Cascadia Mono',9),
                      bg='#ffffff',fg='#808080').pack()
             self.statValLabels[key]=val
@@ -321,7 +327,7 @@ class wordle:
         self.refreshStats()
 
     def refreshStats(self):
-        winPercent=(int(self.status['Wins']/self.stats['Played']*100) if self.stats['Played']>0 else 0)
+        winPercent=(int(self.stats['Wins']/self.stats['Played']*100) if self.stats['Played']>0 else 0)
 
         self.statValLabels['Played'].config(text=str(self.stats['Played']))
         self.statValLabels['winPercent'].config(text=str(winPercent))
@@ -333,12 +339,12 @@ class wordle:
     def onKey(self,event):
         if self.gameOver:
             return
-        key=event.keySYM
+        key=event.keysym
         if key=='Return':
             self.submitGuess()
         elif key=='Delete':
             self.deleteLetter()
-        elif key.isAlpha() and len(key)==1:
+        elif key.isalpha() and len(key)==1:
             self.addLetter(key.lower())
 
     def onKeyButton(self,key):
