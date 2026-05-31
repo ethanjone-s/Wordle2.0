@@ -214,10 +214,10 @@ if __name__=='__main__':
             again=input('\nPlay again? [y/n]: ').lower().strip()
             if again!='y':
                 break
-    if mode=='g':
-        wordleGUI(words)
-    else:
-        break
+    #if mode=='g':
+    #    wordleGUI(words)
+    #else:
+    #    break
 
 
 
