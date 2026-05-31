@@ -249,7 +249,7 @@ class wordle:
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
         # build the tile grid
-        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20))
+        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20),padx=self.s(40))
         gridFrame.pack()
         
         for r in range(6):
