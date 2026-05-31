@@ -280,6 +280,16 @@ class wordle:
         self.buildKeyboard()
         self.buildStats()
 
+        tk.Button(
+            self.root,
+            text='Play Again',
+            font=('Cascadia Mono', 11, 'bold'),
+            bg='#008000', fg='white',
+            relief='flat', bd=0,
+            padx=20, pady=8,
+            command=self.resetGame
+        ).pack(pady=12)
+
     def buildKeyboard(self):
         kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8)
         kbFrame.pack()
@@ -438,6 +448,26 @@ class wordle:
         self.msgLabel.config(text=msg)
         if not permanent:
             self.root.after(2000,lambda:self.msgLabel.config(text=''))
+
+    def resetGame(self):
+        self.target = random.choice(list(self.words))
+        self.currentRow = 0
+        self.currentGuess = []
+        self.priors = set()
+        self.gameOver = False
+        self.keyColors = {}
+
+        for r in range(6):
+            for c in range(5):
+                self.tiles[r][c].config(
+                    bg='#ffffff', highlightbackground='#d3d6da', highlightthickness=2)
+                self.tileLabels[r][c].config(
+                    text='', bg='#ffffff', fg='#161617')
+
+        for btn in self.keyButtons.values():
+            btn.config(bg='#d3d6da', fg='#161617')
+
+        self.msgLabel.config(text='')
 
 #-----------------------Gui-Player-----------------------------#
 
