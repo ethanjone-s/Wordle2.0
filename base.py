@@ -209,7 +209,7 @@ keyboardLayout=[
 ]
 
 class wordle:
-    def __init__(self,root,words):
+    def __init__(self,root,words,scale=1.0):
         self.root=root
         self.root.title('Wordle 2.0')
         self.root.configure(bg='#ffffff')
