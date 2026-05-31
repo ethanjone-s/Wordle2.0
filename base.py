@@ -284,7 +284,7 @@ class wordle:
             font=('Cascadia Mono',self.s(11),'bold'),
             bg='#008000',fg='#ffffff',
             relief='flat',bd=0,
-            padx=self.s(20),self.s(pady=8),
+            padx=self.s(20),pady=self.s(8),
             command=self.resetGame
     ).pack(pady=self.s(12))
 
