@@ -153,6 +153,7 @@ def stats2Terminal(stats):
 
 def wordleTerminal(words):
     '''
+    Main program to run Wordle in local terminal.
     '''
     target=random.choice(list(words))
     stats=loadstats()
@@ -282,7 +283,7 @@ class wordle:
         tk.Button(
             self.root,text='Play Again',
             font=('Cascadia Mono',self.s(11),'bold'),
-            bg='#008000',fg='#ffffff',
+            bg='#385669',fg='#ffffff',
             relief='flat',bd=0,
             padx=self.s(20),pady=self.s(8),
             command=self.resetGame
