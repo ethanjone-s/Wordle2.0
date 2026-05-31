@@ -276,7 +276,8 @@ class wordle:
             bg='#ffffff', fg='#161617')
         self.msgLabel.pack(pady=4)      
 
-        # build keyboard
+        # build keyboard and stats
+        self.buildKeyboard()
         self.buildStats()
 
     def buildKeyboard(self):
