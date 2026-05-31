@@ -492,7 +492,7 @@ if __name__=='__main__':
             if again!='y':
                 break
     if mode=='g':
-        wordleGUI(words,scale=1.25)
+        wordleGUI(words,scale=1.35)
 
 
 
