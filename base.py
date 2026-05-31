@@ -216,7 +216,7 @@ class wordle:
     def __init__(self,root,words):
         self.root=root
         self.root.title('Wordle 2.0')
-        self.root.configure(bg='ffffff')
+        self.root.configure(bg='#ffffff')
         self.root.resizable(False,False)
 
         self.words=words
