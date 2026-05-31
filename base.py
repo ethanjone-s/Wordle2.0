@@ -280,14 +280,16 @@ class wordle:
         self.buildKeyboard()
         self.buildStats()
 
-        tk.Button(
+        self.playAgainBttn=tk.Button(
             self.root,text='Play Again',
             font=('Cascadia Mono',self.s(11),'bold'),
             bg='#385669',fg='#ffffff',
             relief='flat',bd=0,
             padx=self.s(20),pady=self.s(8),
             command=self.resetGame
-    ).pack(pady=self.s(12))
+    )
+        self.playAgainBttn.pack(pady=self.s(12))
+        self.playAgainBttn.pack_forget()     
 
     def buildKeyboard(self):
         kbFrame=tk.Frame(self.root,bg='#ffffff',pady=self.s(8))
@@ -409,6 +411,7 @@ class wordle:
             self.refreshStats()
             self.showMsg(winStatements[self.currentRow],permanent=True)
             self.gameOver=True
+            self.playAgainBttn.pack(pady=self.s(12))
             return
     
         self.currentRow+=1
@@ -419,6 +422,7 @@ class wordle:
             self.refreshStats()
             self.showMsg(self.target.upper(),permanent=True)
             self.gameOver=True
+            self.playAgainBttn.pack(pady=self.s(12))
 
     def colorRow(self,result):
         for col, (letter,color) in enumerate(result):
@@ -449,6 +453,7 @@ class wordle:
             self.root.after(2000,lambda:self.msgLabel.config(text=''))
 
     def resetGame(self):
+        self.playAgainBttn.pack_forget()
         self.target = random.choice(list(self.words))
         self.currentRow = 0
         self.currentGuess = []
