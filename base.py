@@ -195,9 +195,7 @@ def wordleTerminal(words):
 
 #------------------------GUI-PLayer---------------------------#
 
-# WIP
-def wordleGUI(words):
-    return None
+
 
 #------------------------Launcher-----------------------------#
 
@@ -208,11 +206,18 @@ if __name__=='__main__':
         print(f"'{wordsfile}' not found. Add a valid word list to play.")
         exit(1)
 
-    mode=input ('Play in [t]erminal or [g]ui?.').lower().strip()
+    mode=input ('Play in [t]erminal or [g]ui?. ').lower().strip()
+
+    if mode=='t':
+        while True:
+            wordleTerminal(words)
+            again=input('\nPlay again? [y/n]: ').lower().strip()
+            if again!='y':
+                break
     if mode=='g':
         wordleGUI(words)
     else:
-        wordleTerminal(words)
+        break
 
 
 
