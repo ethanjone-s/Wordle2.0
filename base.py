@@ -289,7 +289,7 @@ class wordle:
             rowFrame.pack(pady=2)
 
             for key in rowKeys:
-                wide=key in ('Enter','BackSpace')
+                wide=key in ('Enter','Delete')
                 bttn=tk.Button(
                     rowFrame,
                     text=key if wide else key.upper(),
