@@ -76,10 +76,6 @@ def checker(guess,target):
 
 import random
 
-winStatements=[
-    'Cheater.','Not bad I guess.','Great.','Satisfactory.','Close one.','Balright.'
-]
-
 def wordle():
     ''' 
     Reads in text file of words, randomizes a selection for each attempt.
@@ -222,6 +218,7 @@ class wordle:
         self.words=words
         self.target=random.choice(list(words))
         self.stats=loadstats()
+        self.scale=scale
 
         self.currentRow=0
         self.currentGuess=[]
@@ -235,34 +232,36 @@ class wordle:
 
         self.buildUI()
         self.root.bind('<Key>',self.onKey)
+    
+    def s(self,n):
+        return int(n*self.scale)
 
     #--------------------Building-The-UI----------------------#
 
     def buildUI(self):
-
         # build the header
         tk.Frame(self.root,bg='#a9b3c2',height=1).pack(fill='x')
-        header=tk.Frame(self.root,bg='#ffffff',pady=10)
+        header=tk.Frame(self.root,bg='#ffffff',pady=self.s(10))
         header.pack(fill='x')
-        tk.Label(header,text='Wordle 2.0',font=('Cascadia Mono',28,'bold'),
+        tk.Label(header,text='Wordle 2.0',font=('Cascadia Mono',self.s(28),'bold'),
                  bg='#ffffff',fg='#161617').pack()
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
         # build the tile grid
-        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=20)
+        gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20))
         gridFrame.pack()
         
         for r in range(6):
             rowTiles,rowLabels=[],[]
             for c in range(5):
                 frame=tk.Frame(
-                    gridFrame,width=62,height=62,bg='#ffffff',
+                    gridFrame,width=self.s(62),height=self.s(62),bg='#ffffff',
                     highlightbackground='#d3d6da',highlightthickness=2
                 )
-                frame.grid(row=r,column=c,padx=3,pady=3)
+                frame.grid(row=r,column=c,padx=self.s(3),pady=self.s(3))
                 frame.pack_propagate(False)
 
-                label=tk.Label(frame,text='',font=('Cascadia Mono',24,'bold'),
+                label=tk.Label(frame,text='',font=('Cascadia Mono',self.s(24),'bold'),
                                bg='#ffffff',fg='#161617')
                 label.pack(expand=True,fill='both')
                 rowTiles.append(frame)
@@ -272,50 +271,49 @@ class wordle:
 
         # build the message bar
         self.msgLabel = tk.Label(
-            self.root, text='', font=('Cascadia Mono', 12, 'bold'),
-            bg='#ffffff', fg='#161617')
-        self.msgLabel.pack(pady=4)      
+            self.root, text='',font=('Cascadia Mono',self.s(12),'bold'),
+            bg='#ffffff',fg='#161617')
+        self.msgLabel.pack(pady=self.s(4))      
 
         # build keyboard and stats
         self.buildKeyboard()
         self.buildStats()
 
         tk.Button(
-            self.root,
-            text='Play Again',
-            font=('Cascadia Mono', 11, 'bold'),
-            bg='#008000', fg='#ffffff',
-            relief='flat', bd=0,
-            padx=20, pady=8,
+            self.root,text='Play Again',
+            font=('Cascadia Mono',self.s(11),'bold'),
+            bg='#008000',fg='#ffffff',
+            relief='flat',bd=0,
+            padx=self.s(20),self.s(pady=8),
             command=self.resetGame
-    ).pack(pady=12)
+    ).pack(pady=self.s(12))
 
     def buildKeyboard(self):
-        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8)
+        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=self.s(8))
         kbFrame.pack()
 
         for rowKeys in keyboardLayout:
             rowFrame=tk.Frame(kbFrame,bg='#ffffff')
-            rowFrame.pack(pady=2)
+            rowFrame.pack(pady=self.s(2))
 
             for key in rowKeys:
                 wide=key in ('Enter','⌫')
                 bttn=tk.Button(
                     rowFrame,
                     text=key if wide else key.upper(),
-                    font=('Cascadia Mono',10,'bold'),
+                    font=('Cascadia Mono',self.s(10),'bold'),
                     bg='#d3d6da',fg='#161617',
                     width=6 if wide else 3,
                     height=2,
                     relief='flat',bd=0,
                     command=lambda k=key: self.onKeyButton(k)
                 )
-                bttn.pack(side='left',padx=2)
+                bttn.pack(side='left',padx=self.s(2))
                 if not wide:
                     self.keyButtons[key]=bttn
 
     def buildStats(self):
-        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=14)
+        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=self.s(14))
         statsFrame.pack()
 
         self.statValLabels={}
@@ -327,12 +325,12 @@ class wordle:
         ]
 
         for i,(key,label) in enumerate(items):
-            col=tk.Frame(statsFrame,bg='#ffffff',padx=14)
+            col=tk.Frame(statsFrame,bg='#ffffff',padx=self.s(14))
             col.grid(row=0,column=i)
-            val=tk.Label(col,text='0',font=('Cascadia Mono',22,'bold'),
+            val=tk.Label(col,text='0',font=('Cascadia Mono',self.s(22),'bold'),
                          bg='#ffffff')
             val.pack()
-            tk.Label(col,text=label,font=('Cascadia Mono',9),
+            tk.Label(col,text=label,font=('Cascadia Mono',self.s(9)),
                      bg='#ffffff',fg='#808080').pack()
             self.statValLabels[key]=val
 
@@ -473,7 +471,7 @@ class wordle:
 
 def wordleGUI(words):
     root=tk.Tk()
-    wordle(root,words)
+    wordle(root,words,scale=scale)
     root.mainloop()
 
 #------------------------Launcher-----------------------------#
@@ -494,7 +492,7 @@ if __name__=='__main__':
             if again!='y':
                 break
     if mode=='g':
-        wordleGUI(words)
+        wordleGUI(words,scale=1.5)
 
 
 
