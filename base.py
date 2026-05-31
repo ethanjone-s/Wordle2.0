@@ -285,7 +285,8 @@ class wordle:
         kbFrame.pack()
 
         for rowKeys in keyboardLayout:
-            rowFrame=tk.Frame(kbFrame,bg='#ffffff').pack(pady=2)
+            rowFrame=tk.Frame(kbFrame,bg='#ffffff')
+            rowFrame.pack(pady=2)
 
             for key in rowKeys:
                 wide=key in ('Enter','BackSpace')
