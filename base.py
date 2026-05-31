@@ -244,7 +244,7 @@ class wordle:
         tk.Frame(self.root,bg='#a9b3c2',height=1).pack(fill='x')
         header=tk.Frame(self.root,bg='#ffffff',pady=self.s(10))
         header.pack(fill='x')
-        tk.Label(header,text='Wordle 2.0',font=('Cascadia Mono',self.s(28),'bold'),
+        tk.Label(header,text='Wordlite',font=('Cascadia Mono',self.s(28),'bold'),
                  bg='#ffffff',fg='#161617').pack()
         tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
         
