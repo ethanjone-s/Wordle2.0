@@ -200,7 +200,7 @@ letterColors={
     'green':{'bg':"#008000",'fg':"white"},
     'yellow':{'bg':"#c9c869",'fg':"white"},
     'grey':{'bg':"#808080",'fg':"white"},
-    'empty':{'bg':"#ffffff",'fg':"black"}
+    'empty':{'bg':"#1c1c1c",'fg':"black"}
 }
 winStatements=[
     'Cheater.','Not bad I guess.','Great.','Satisfactory.','Close one.','Balright.'
