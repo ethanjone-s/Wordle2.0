@@ -469,7 +469,7 @@ class wordle:
 
 #-----------------------Gui-Player-----------------------------#
 
-def wordleGUI(words):
+def wordleGUI(words,scale=1.0):
     root=tk.Tk()
     wordle(root,words,scale=scale)
     root.mainloop()
