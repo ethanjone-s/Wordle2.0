@@ -126,9 +126,10 @@ def wordle():
 
     print(f'The word was: {target}.')
 
-#------------------------Terminal-PLayer-----------------------#
+#------------------------Terminal-Player-----------------------#
 
 from colorama import Fore,Back,Style,init
+import tkinter as tk
 
 init(autoreset=True)
 
@@ -193,9 +194,249 @@ def wordleTerminal(words):
     updatestats(stats,False,0)
     stats2Terminal(stats)
 
-#------------------------GUI-PLayer---------------------------#
+#------------------------GUI-Player---------------------------#
 
+letterColors={
+    'green':{'bg':"#008000",'fg':"white"},
+    'yellow':{'bg':"#c9c869",'fg':"white"},
+    'grey':{'bg':"#808080",'fg':"white"},
+    'empty':{'bg':"#ffffff",'fg':"black"}
+}
+winStatements=[
+    'Cheater.','Not bad I guess.','Great.','Satisfactory.','Close one.','Balright.'
+]
+# keyboard layout
+keyboardLayout=[
+    list('qwertyuiop'),
+    list('asdfghjkl'),
+    ['Enter']+list('zxcvbnm')+['Delete']
+]
 
+class wordle:
+    def __init__(self,root,words):
+        self.root=root
+        self.root.title('Wordle 2.0')
+        self.root.configure(bg='ffffff')
+        self.root.resizable(False,False)
+
+        self.words=words
+        self.target=random.choice(list(words))
+        self.stats=loadstats()
+
+        self.currentRow=0
+        self.currentGuess=[]
+        self.priors=set()
+        self.gameOver=False
+        self.keyColors={}
+
+        self.tiles=[]
+        self.tileLabels=[]
+        self.keyButtons={}
+
+        self.buildUI()
+        self.root.bind('<Key>',self.onKey)
+
+    #--------------------Building-The-UI----------------------#
+
+    def buildUI(self):
+
+        # build the header
+        tk.Frame(self.root,bg='#a9b3c2',height=1).pack(fill='x')
+        header=tk.Frame(self.root,bg='#ffffff',pady=10)
+        header.pack(fill='x')
+        tk.Label(header,text='Wordle 2.0',font=('Cascadia Mono',28,'bold'),
+                 bg='#ffffff',fg='#161617').pack()
+        tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
+        
+        # build the tile grid
+        gridFrame=tk.Frame(self.root,bg='#ffffff',pady=20).pack()
+        for r in range(6):
+            rowTiles,rowLabels=[],[]
+            for c in range(5):
+                frame=tk.Frame(
+                    gridFrame,width=62,height=62,bg='#ffffff',
+                    highlightbackground='#d3d6da',highlightthickness=2
+                )
+                frame.grid(row=r,column=c,padx=3,pady=3)
+                frame.pack_propagate(False)
+
+                label=tk.Label(frame,text='',font=('Cascadia Mono',24,'bold'),
+                               bg='#ffffff',fg='#161617')
+                label.pack(expand=True,fill='both')
+                rowTiles.append(frame)
+                rowLabels.append(label)
+            self.tiles.append(rowTiles)
+            self.tileLabels.append(rowLabels)
+
+        # build the message bar
+        self.msgLabel=tk.Label(
+            self.root,text='',font=('Cascadia Mono',12,'bold'),
+            bg='#ffffff',fg='#161617').pack(pady=4)      
+
+        # build keyboard
+        self.buildStats()
+
+    def buildKeyboard(self):
+        kbFrame=tk.Frame(self.root,bg='#ffffff',pady=8).pack()
+
+        for rowKeys in keyboardLayout:
+            rowFrame=tk.Frame(kbFrame,bg='#ffffff').pack(pady=2)
+
+            for key in rowKeys:
+                wide=key in ('Enter','Delete')
+                bttn=tk.Button(
+                    rowFrame,
+                    text=key if wide else key.upper(),
+                    font=('Cascadia Mono',10,'bold'),
+                    bg='#d3d6da',fg='#161617',
+                    width=6 if wide else 3,
+                    height=2,
+                    relief='flat',bd=0,
+                    command=lambda k=key: self.onKeyButton(k)
+                )
+                bttn.pack(side='left',padx=2)
+                if not wide:
+                    self.keyButtons[key]=bttn
+
+    def buildStats(self):
+        statsFrame=tk.Frame(self.root,bg='#ffffff',pady=14).pack()
+
+        self.statValLabels={}
+        items=[
+            ('Played','Played'),
+            ('winPercent','Win %'),
+            ('Current Streak','Streak'),
+            ('Max Streak','Best')
+        ]
+
+        for i,(key,label) in enumerate(items):
+            col=tk.Frame(statsFrame,bg='#ffffff',padx=14)
+            col.grid(row=0,column=i)
+            val=tk.Label(col,text='0',font=('Cascadia Mono',22,'bold'),
+                         bg='#ffffff').pack()
+            tk.Label(col,text=label,font=('Cascadia Mono',9),
+                     bg='#ffffff',fg='#808080').pack()
+            self.statValLabels[key]=val
+
+        self.refreshStats()
+
+    def refreshStats(self):
+        winPercent=(int(self.status['Wins']/self.stats['Played']*100) if self.stats['Played']>0 else 0)
+
+        self.statValLabels['Played'].config(text=str(self.stats['Played']))
+        self.statValLabels['winPercent'].config(text=str(winPercent))
+        self.statValLabels['Current Streak'].config(text=str(self.stats['Current Streak']))
+        self.statValLabels['Max Streak'].config(text=str(self.stats['Max Streak']))
+
+    #--------------------Input-Handling-----------------------#
+
+    def onKey(self,event):
+        if self.gameOver:
+            return
+        key=event.keySYM
+        if key=='Return':
+            self.submitGuess()
+        elif key=='Delete':
+            self.deleteLetter()
+        elif key.isAlpha() and len(key)==1:
+            self.addLetter(key.lower())
+
+    def onKeyButton(self,key):
+        if self.gameOver:
+            return
+        if key=='Enter':
+            self.submitGuess()
+        elif key=='Delete':
+            self.deleteLetter()
+        else:
+            self.addLetter(key)
+
+    def addLetter(self,letter):
+        if len(self.currentGuess)<5:
+            col=len(self.currentGuess)
+            self.tileLabels[self.currentRow][col].config(text=letter.upper())
+            self.tiles[self.currentRow][col].config(
+                highlightbackground='#878a8c',highlightthickness=2)
+            self.currentGuess.append(letter)
+
+    def deleteLetter(self):
+        if self.currentGuess:
+            self.currentGuess.pop()
+            col=len(self.currentGuess)
+            self.tileLabels[self.currentRow][col].config(text='')
+            self.tiles[self.currentRow][col].config(
+                highlightbackground='#d3d6da',highlightthickness=2)
+            
+    #------------------Guess-Submission---------------------#
+
+    def submitGuess(self):
+        guess=''.join(self.currentGuess)
+
+        if len(guess)!=5:
+            self.showMsg('Answer must be 5 letters.')
+            return
+        if guess in self.priors:
+            self.showMsg('Already guessed')
+            return
+        if guess not in self.words:
+            self.showMsg('Not in word list.')
+            return
+    
+        self.priors.add(guess)
+        result=checker(guess,self.target)
+        self.colorRow(result)
+        self.updateKeyboard(result)
+
+        if guess==self.target:
+            updatestats(self.stats,True,self.currentRow+1)
+            self.refreshStats()
+            self.showMsg(winStatements[self.currentRow],permanent=True)
+            self.gameOver=True
+            return
+    
+        self.currentRow+=1
+        self.currentGuess=[]
+
+        if self.currentRow==6:
+            updatestats(self.stats,False,0)
+            self.refreshStats()
+            self.showMsg(self.target.upper(),permanent=True)
+            self.gameOver=True
+
+    def colorRow(self,result):
+        for col, (letter,color) in enumerate(result):
+            colors=letterColors[color]
+            self.tiles[self.currentRow][col].config(
+                bg=colors['bg'],highlightbackground=colors['bg'])
+            self.tileLabels[self.currentRow][col].config(
+                bg=colors['bg'],fg=colors['fg'])
+        
+    def updateKeyboard(self,result):
+        '''
+        Priority set for green to change first, then yellow, then grey.
+        '''
+        priority={'green':3,'yellow':2,'grey':1}
+        for letter, color in result:
+            if letter in self.keyButtons:
+                current=self.keyColors.get(letter,'none')
+                if priority.get(color,0)>priority.get(current,0):
+                    self.keyColors[letter]=color
+                    self.keyButtons[letter].config(
+                        bg=letterColors[color]['bg'],
+                        fg=letterColors[color]['fg']
+                    )
+
+    def showMsg(self,msg,permanent=False):
+        self.msgLabel.config(text=msg)
+        if not permanent:
+            self.root.after(2000,lambda:self.msgLabel.config(text=''))
+
+#-----------------------Gui-Player-----------------------------#
+
+def wordleGUI(words):
+    root=tk.Tk()
+    wordle(root,words)
+    root.mainloop()
 
 #------------------------Launcher-----------------------------#
 
@@ -214,10 +455,8 @@ if __name__=='__main__':
             again=input('\nPlay again? [y/n]: ').lower().strip()
             if again!='y':
                 break
-    #if mode=='g':
-    #    wordleGUI(words)
-    #else:
-    #    break
+    if mode=='g':
+        wordleGUI(words)
 
 
 
