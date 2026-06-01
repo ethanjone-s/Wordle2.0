@@ -247,7 +247,7 @@ class wordle:
 
     def buildUI(self):
         # build the header
-        tk.Frame(self.root,bg='#a9b3c2',height=1).pack(fill='x')
+        tk.Frame(self.root,bg='#ffffff',height=1).pack(fill='x')
         header=tk.Frame(self.root,bg='#ffffff',pady=self.s(10))
         header.pack(fill='x')
         tk.Label(header,text='Wordlite',font=('Cascadia Mono',self.s(28),'bold'),
@@ -260,7 +260,7 @@ class wordle:
             command=self.showMenu
         )
         self.menu.place(relx=1.0,rely=0.5,anchor='e',x=-self.s(10))
-        tk.Frame(self.root,bg='#d3d6da',height=1).pack(fill='x')
+        tk.Frame(self.root,bg='#ffffff',height=1).pack(fill='x')
         
         # build the tile grid
         gridFrame = tk.Frame(self.root, bg='#ffffff', pady=self.s(20),padx=self.s(80))
@@ -399,7 +399,7 @@ class wordle:
 
     def showMenu(self):
         menu=tk.Menu(self.root,tearoff=0)
-        menu.add_command(label='Dark Mode',command=self.toggleDarkMode)
+        menu.add_command(label='Light Mode' if self.darkMode else 'Dark Mode',command=self.toggleDarkMode)
         menu.add_command(label='Stats',command=self.showStatsWindow)
         menu.add_command(label='Tile Colors',command=self.showColorPicker)
         
@@ -416,6 +416,8 @@ class wordle:
             return
 
         win=tk.Toplevel(self.root)
+        self.statsWin=win
+        win.protocol('WM_DELETE_WINDOW',lambda:setattr(self,'statsWin',None) or win.destroy())
         win.title('Stats')
         win.configure(bg=swbg)
         win.resizable(False,False)
@@ -479,6 +481,8 @@ class wordle:
             return
 
         win=tk.Toplevel(self.root)
+        self.colorWin=win  # store reference
+        win.protocol('WM_DELETE_WINDOW',lambda:setattr(self,'colorWin',None) or win.destroy())
         win.configure(bg=cpbg)
         win.resizable(False,False)
 
@@ -642,6 +646,7 @@ class wordle:
             btn.config(bg='#d3d6da', fg='#161617')
 
         self.msgLabel.config(text='')
+        self.recolor(self.root)
 
 #-----------------------Gui-Player-----------------------------#
 
