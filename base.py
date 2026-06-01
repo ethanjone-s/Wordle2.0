@@ -251,7 +251,7 @@ class wordle:
                  bg='#ffffff',fg='#161617').pack()
         self.menu=tk.Button(
             header,text='≡',
-            font=('Cascadia Mono',self.s(14)),
+            font=('Cascadia Mono',self.s(18)),
             bg='#ffffff',fg='#161617',
             relief='flat',bd=0,
             command=self.showMenu
@@ -289,7 +289,7 @@ class wordle:
 
         # build keyboard and stats
         self.buildKeyboard()
-        self.buildStats()
+        #self.buildStats()
 
         self.playAgainBttn=tk.Button(
             self.root,text='Play Again',
@@ -388,48 +388,61 @@ class wordle:
             col = tk.Frame(statsRow,bg='#ffffff',padx=self.s(12))
             col.grid(row=0,column=i)
             tk.Label(col,text=str(value),font=('Cascadia Mono',self.s(20),'bold'),
-                    bg='#ffffff').pack()
+                    bg='#ffffff',fg='#161617').pack()
             tk.Label(col, text=label,font=('Cascadia Mono',self.s(9)),
-                    bg='#ffffff',fg='#808080').pack()
+                    bg='#ffffff',fg='#161617').pack()
             
-        tk.Frame(win,bg='#d3d6da',height=1).pack(fill='x',pady=self.s(4))
+        tk.Frame(win,bg='#ffffff',height=1).pack(fill='x',pady=self.s(4))
 
         # user guess distribution
         tk.Label(win,text='Guess Distribution',
                 font=('Cascadia Mono',self.s(11),'bold'),
-                bg='#ffffff').pack(pady=(self.s(6),self.s(4)))
+                bg='#ffffff',fg='#161617').pack(pady=(self.s(6),self.s(4)))
         
         distFrame=tk.Frame(win,bg='#ffffff')
         distFrame.pack(padx=self.s(20),pady=self.s(8))
+
         maxCount=max(self.stats['Guess Distribution'].values()) or 1
 
-        for k in range(1,7):
+        for k in range(1, 7):
             count=self.stats['Guess Distribution'][str(k)]
-            bWidth=max(self.s(20),int((count/maxCount)*self.s(150)))
+            bWidth=max(self.s(30),int((count/maxCount)*self.s(200)))
+            bColor='#566eb0' if count==maxCount else '#8fe089'
+
             row=tk.Frame(distFrame,bg='#ffffff')
             row.pack(fill='x',pady=self.s(2))
+
             tk.Label(row,text=str(k),font=('Cascadia Mono',self.s(10)),
-                bg='#ffffff',width=2).pack(side='left')
-            tk.Frame(row,text=str(count),font=('Cascadia Mono',self.s(10)),
-                     bg='#ffffff').pack(side='left')
+                bg='#ffffff',fg='#161617',width=2,anchor='e').pack(side='left',padx=(0,self.s(6)))
+
+            bar=tk.Frame(row,bg=bColor,height=self.s(24),width=bWidth)
+            bar.pack_propagate(False)
+            bar.pack(side='left')
+
+            tk.Label(bar,text=str(count),font=('Cascadia Mono',self.s(9),'bold'),
+                bg=bColor,fg='#161617').pack(side='right',padx=self.s(6),expand=True)
 
     def toggleDarkMode(self):
         self.darkMode=not self.darkMode
-        bg='#121213' if self.darkMode else '#ffffff'
-        fg='#ffffff' if self.darkMode else '#161617'
+        bg='#212121' if self.darkMode else '#ffffff'
+        fg='#e3e3e3' if self.darkMode else '#161617'
         kbBg='#818384' if self.darkMode else '#d3d6da'
+        greyKb = '#404040' if self.darkMode else '#808080'
         
-        letterColors['empty']={'bg':bg,'fg':fg}
+        letterColors['empty']['bg']=bg
+        letterColors['empty']['fg']=fg
+        letterColors['grey']['bg']=greyKb
+
         def recolor(widget):
             try:
-                if widget.cget('bg') in ('#ffffff','#121213'):
+                if widget.cget('bg') in ('#ffffff','#212121'):
                     widget.config(bg=bg)
                 elif widget.cget('bg') in ('#d3d6da','#818384'):
                     widget.config(bg=kbBg)
             except tk.TclError:
                 pass
             try:
-                if widget.cget('fg') in ('#161617','#ffffff'):
+                if widget.cget('fg') in ('#161617','#c2c2c2'):
                     widget.config(fg=fg)
             except tk.TclError:
                 pass
@@ -438,15 +451,18 @@ class wordle:
         
         recolor(self.root)
 
+        for letter,color in self.keyColors.items():
+            if color=='grey'and letter in self.keyButtons:
+                self.keyButtons[letter].config(bg=greyKb)
+
     def showColorPicker(self):
         win=tk.Toplevel(self.root)
-        win.title('Tile Colors')
         win.configure(bg='#ffffff')
         win.resizable(False,False)
 
-        tk.Label(win,text='Tile Colors',
-                font=('Cascadia Mono', self.s(14), 'bold'),
-                bg='#ffffff').pack(pady=(self.s(10), self.s(6)))
+        #tk.Label(win,text='',
+        #        font=('Cascadia Mono', self.s(14), 'bold'),
+        #        bg='#ffffff').pack(pady=(self.s(10), self.s(6)))
         frame=tk.Frame(win,bg='#ffffff')
         frame.pack(padx=self.s(20),pady=self.s(10))
 
@@ -456,13 +472,13 @@ class wordle:
             ('Incorrect','grey')
         ]):
             tk.Label(frame,text=name,font=('Cascadia Mono',self.s(10)),
-                bg='#ffffff',width=10,anchor='w').grid(row=i,column=0,pady=self.s(6))
+                bg='#ffffff',fg='#161617',width=10,anchor='w').grid(row=i,column=0,pady=self.s(6))
             preview=tk.Frame(frame,bg=letterColors[key]['bg'],
                             width=self.s(32), height=self.s(32))
             preview.grid(row=i,column=1,padx=self.s(10))
             preview.grid_propagate(False)
             tk.Button(frame,text='Change',font=('Cascadia Mono',self.s(9)),
-                    relief='flat',bg='#d3d6da',
+                    relief='flat',bg='#d3d6da',fg='#161617',
                     command=lambda k=key,p=preview:self.changeColor(k,p)
                     ).grid(row=i,column=2,padx=self.s(6)) 
 
@@ -540,7 +556,6 @@ class wordle:
 
         if guess==self.target:
             updatestats(self.stats,True,self.currentRow+1)
-            self.refreshStats()
             self.showMsg(winStatements[self.currentRow],permanent=True)
             self.gameOver=True
             self.playAgainBttn.pack(pady=self.s(12))
@@ -551,7 +566,6 @@ class wordle:
 
         if self.currentRow==6:
             updatestats(self.stats,False,0)
-            self.refreshStats()
             self.showMsg(self.target.upper(),permanent=True)
             self.gameOver=True
             self.playAgainBttn.pack(pady=self.s(12))
