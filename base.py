@@ -224,6 +224,9 @@ class wordle:
         self.scale=scale
         self.darkMode=False
 
+        self.statsWin=None
+        self.colorWin=None
+
         self.currentRow=0
         self.currentGuess=[]
         self.priors=set()
@@ -358,10 +361,46 @@ class wordle:
         self.statValLabels['Current Streak'].config(text=str(self.stats['Current Streak']))
         self.statValLabels['Max Streak'].config(text=str(self.stats['Max Streak']))
 
+    def recolor(self,widget):
+        bg='#212121' if self.darkMode else '#ffffff'
+        fg='#e3e3e3' if self.darkMode else '#161617'
+        kbBg='#818384' if self.darkMode else '#d3d6da'
+        try:
+            if widget.cget('bg') in ('#ffffff','#212121'):
+                widget.config(bg=bg)
+            elif widget.cget('bg') in ('#d3d6da','#818384'):
+                widget.config(bg=kbBg)
+        except tk.TclError:
+            pass
+        try:
+            if widget.cget('fg') in ('#161617','#e3e3e3'):
+                widget.config(fg=fg)
+        except tk.TclError:
+            pass
+        for child in widget.winfo_children():
+            self.recolor(child)
+
+    def toggleDarkMode(self):
+        self.darkMode=not self.darkMode
+        greyKb='#404040' if self.darkMode else '#808080'
+
+        letterColors['empty']['bg']='#212121' if self.darkMode else '#ffffff'
+        letterColors['empty']['fg']='#e3e3e3' if self.darkMode else '#161617'
+        letterColors['grey']['bg']=greyKb
+
+        self.recolor(self.root)
+        for win in [self.statsWin,self.colorWin]:
+            if win and win.winfo_exists():
+                self.recolor(win)
+
+        for letter,color in self.keyColors.items():
+            if color=='grey' and letter in self.keyButtons:
+                self.keyButtons[letter].config(bg=greyKb)
+
     def showMenu(self):
         menu=tk.Menu(self.root,tearoff=0)
-        menu.add_command(label='Stats',command=self.showStatsWindow)
         menu.add_command(label='Dark Mode',command=self.toggleDarkMode)
+        menu.add_command(label='Stats',command=self.showStatsWindow)
         menu.add_command(label='Tile Colors',command=self.showColorPicker)
         
         x=self.menu.winfo_rootx()
@@ -369,15 +408,22 @@ class wordle:
         menu.tk_popup(x,y)
 
     def showStatsWindow(self):
+        swbg='#ffffff'
+        swfg='#161617'
+
+        if self.statsWin and self.statsWin.winfo_exists():
+            self.statsWin.lift()
+            return
+
         win=tk.Toplevel(self.root)
         win.title('Stats')
-        win.configure(bg='#ffffff')
+        win.configure(bg=swbg)
         win.resizable(False,False)
 
-        winPercent=int(self.stats['Wins']/self.stats['Played']*100 if self.stats['Played'] > 0 else 0)
+        winPercent=int(self.stats['Wins']/self.stats['Played']*100 if self.stats['Played']>0 else 0)
 
         # building the highest stats
-        statsRow=tk.Frame(win,bg='#ffffff',pady=self.s(10))
+        statsRow=tk.Frame(win,bg=swbg,pady=self.s(10))
         statsRow.pack()
         for i, (label,value) in enumerate([
             ('Played',self.stats['Played']),
@@ -385,21 +431,21 @@ class wordle:
             ('Streak',self.stats['Current Streak']),
             ('Best',self.stats['Max Streak'])
         ]):
-            col = tk.Frame(statsRow,bg='#ffffff',padx=self.s(12))
+            col = tk.Frame(statsRow,bg=swbg,padx=self.s(12))
             col.grid(row=0,column=i)
             tk.Label(col,text=str(value),font=('Cascadia Mono',self.s(20),'bold'),
-                    bg='#ffffff',fg='#161617').pack()
+                    bg=swbg,fg=swfg).pack()
             tk.Label(col, text=label,font=('Cascadia Mono',self.s(9)),
-                    bg='#ffffff',fg='#161617').pack()
+                    bg=swbg,fg=swfg).pack()
             
-        tk.Frame(win,bg='#ffffff',height=1).pack(fill='x',pady=self.s(4))
+        tk.Frame(win,bg=swbg,height=1).pack(fill='x',pady=self.s(4))
 
         # user guess distribution
         tk.Label(win,text='Guess Distribution',
                 font=('Cascadia Mono',self.s(11),'bold'),
-                bg='#ffffff',fg='#161617').pack(pady=(self.s(6),self.s(4)))
+                bg=swbg,fg=swfg).pack(pady=(self.s(6),self.s(4)))
         
-        distFrame=tk.Frame(win,bg='#ffffff')
+        distFrame=tk.Frame(win,bg=swbg)
         distFrame.pack(padx=self.s(20),pady=self.s(8))
 
         maxCount=max(self.stats['Guess Distribution'].values()) or 1
@@ -409,61 +455,37 @@ class wordle:
             bWidth=max(self.s(30),int((count/maxCount)*self.s(200)))
             bColor='#566eb0' if count==maxCount else '#8fe089'
 
-            row=tk.Frame(distFrame,bg='#ffffff')
+            row=tk.Frame(distFrame,bg=swbg)
             row.pack(fill='x',pady=self.s(2))
 
             tk.Label(row,text=str(k),font=('Cascadia Mono',self.s(10)),
-                bg='#ffffff',fg='#161617',width=2,anchor='e').pack(side='left',padx=(0,self.s(6)))
+                bg=swbg,fg=swfg,width=2,anchor='e').pack(side='left',padx=(0,self.s(6)))
 
             bar=tk.Frame(row,bg=bColor,height=self.s(24),width=bWidth)
             bar.pack_propagate(False)
             bar.pack(side='left')
 
             tk.Label(bar,text=str(count),font=('Cascadia Mono',self.s(9),'bold'),
-                bg=bColor,fg='#161617').pack(side='right',padx=self.s(6),expand=True)
-
-    def toggleDarkMode(self):
-        self.darkMode=not self.darkMode
-        bg='#212121' if self.darkMode else '#ffffff'
-        fg='#e3e3e3' if self.darkMode else '#161617'
-        kbBg='#818384' if self.darkMode else '#d3d6da'
-        greyKb = '#404040' if self.darkMode else '#808080'
-        
-        letterColors['empty']['bg']=bg
-        letterColors['empty']['fg']=fg
-        letterColors['grey']['bg']=greyKb
-
-        def recolor(widget):
-            try:
-                if widget.cget('bg') in ('#ffffff','#212121'):
-                    widget.config(bg=bg)
-                elif widget.cget('bg') in ('#d3d6da','#818384'):
-                    widget.config(bg=kbBg)
-            except tk.TclError:
-                pass
-            try:
-                if widget.cget('fg') in ('#161617','#c2c2c2'):
-                    widget.config(fg=fg)
-            except tk.TclError:
-                pass
-            for child in widget.winfo_children():
-                recolor(child)
-        
-        recolor(self.root)
-
-        for letter,color in self.keyColors.items():
-            if color=='grey'and letter in self.keyButtons:
-                self.keyButtons[letter].config(bg=greyKb)
+                bg=bColor,fg=swfg).pack(side='right',padx=self.s(6),expand=True)
+    
+        self.recolor(win)
 
     def showColorPicker(self):
+        cpbg='#ffffff'
+        cpfg='#161617'
+
+        if self.colorWin and self.colorWin.winfo_exists():
+            self.colorWin.lift()
+            return
+
         win=tk.Toplevel(self.root)
-        win.configure(bg='#ffffff')
+        win.configure(bg=cpbg)
         win.resizable(False,False)
 
         #tk.Label(win,text='',
         #        font=('Cascadia Mono', self.s(14), 'bold'),
         #        bg='#ffffff').pack(pady=(self.s(10), self.s(6)))
-        frame=tk.Frame(win,bg='#ffffff')
+        frame=tk.Frame(win,bg=cpbg)
         frame.pack(padx=self.s(20),pady=self.s(10))
 
         for i,(name,key) in enumerate([
@@ -472,7 +494,7 @@ class wordle:
             ('Incorrect','grey')
         ]):
             tk.Label(frame,text=name,font=('Cascadia Mono',self.s(10)),
-                bg='#ffffff',fg='#161617',width=10,anchor='w').grid(row=i,column=0,pady=self.s(6))
+                bg=cpbg,fg=cpfg,width=10,anchor='w').grid(row=i,column=0,pady=self.s(6))
             preview=tk.Frame(frame,bg=letterColors[key]['bg'],
                             width=self.s(32), height=self.s(32))
             preview.grid(row=i,column=1,padx=self.s(10))
@@ -481,6 +503,8 @@ class wordle:
                     relief='flat',bg='#d3d6da',fg='#161617',
                     command=lambda k=key,p=preview:self.changeColor(k,p)
                     ).grid(row=i,column=2,padx=self.s(6)) 
+
+        self.recolor(win)
 
     def changeColor(self,colorKey,preview):
         result=colorchooser.askcolor(
