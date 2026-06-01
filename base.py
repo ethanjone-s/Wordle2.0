@@ -413,13 +413,71 @@ class wordle:
             tk.Frame(row,text=str(count),font=('Cascadia Mono',self.s(10)),
                      bg='#ffffff').pack(side='left')
 
-    #def toggleDarkMode(self):
+    def toggleDarkMode(self):
+        self.darkMode=not self.darkMode
+        bg='#121213' if self.darkMode else '#ffffff'
+        fg='#ffffff' if self.darkMode else '#161617'
+        kbBg='#818384' if self.darkMode else '#d3d6da'
+        
+        letterColors['empty']={'bg':bg,'fg':fg}
+        def recolor(widget):
+            try:
+                if widget.cget('bg') in ('#ffffff','#121213'):
+                    widget.config(bg=bg)
+                elif widget.cget('bg') in ('#d3d6da','#818384'):
+                    widget.config(bg=kbBg)
+            except tk.TclError:
+                pass
+            try:
+                if widget.cget('fg') in ('#161617','#ffffff'):
+                    widget.config(fg=fg)
+            except tk.TclError:
+                pass
+            for child in widget.winfo_children():
+                recolor(child)
+        
+        recolor(self.root)
 
-        #def recolor():
+    def showColorPicker(self):
+        win=tk.Toplevel(self.root)
+        win.title('Tile Colors')
+        win.configure(bg='#ffffff')
+        win.resizable(False,False)
 
-    #def showColorPicker(self):
+        tk.Label(win,text='Tile Colors',
+                font=('Cascadia Mono', self.s(14), 'bold'),
+                bg='#ffffff').pack(pady=(self.s(10), self.s(6)))
+        frame=tk.Frame(win,bg='#ffffff')
+        frame.pack(padx=self.s(20),pady=self.s(10))
 
-    #def changeColor(self,colorKey,preview):
+        for i,(name,key) in enumerate([
+            ('Correct','blue'),
+            ('Misplaced','yellow'),
+            ('Incorrect','grey')
+        ]):
+            tk.Label(frame,text=name,font=('Cascadia Mono',self.s(10)),
+                bg='#ffffff',width=10,anchor='w').grid(row=i,column=0,pady=self.s(6))
+            preview=tk.Frame(frame,bg=letterColors[key]['bg'],
+                            width=self.s(32), height=self.s(32))
+            preview.grid(row=i,column=1,padx=self.s(10))
+            preview.grid_propagate(False)
+            tk.Button(frame,text='Change',font=('Cascadia Mono',self.s(9)),
+                    relief='flat',bg='#d3d6da',
+                    command=lambda k=key,p=preview:self.changeColor(k,p)
+                    ).grid(row=i,column=2,padx=self.s(6)) 
+
+    def changeColor(self,colorKey,preview):
+        result=colorchooser.askcolor(
+            color=letterColors[colorKey]['bg'],
+            title=f'Choose color for {colorKey} tiles.'
+        )
+        if result[1]:
+            letterColors[colorKey]['bg']=result[1]
+            preview.config(bg=result[1])
+
+            for letter,color in self.keyColors.items():
+                if color==colorKey and letter in self.keyButtons:
+                    self.keyButtons[letter].config(bg=result[1])
 
     #--------------------Input-Handling-----------------------#
 
